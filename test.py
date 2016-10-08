@@ -33,5 +33,6 @@ session.get(url, verify=False)
 for i in range(10):
     print "Pass %s" % i
     time.sleep(delay)
+    # fake user agent to make it easier to cross reference the access log
     headers = {'User-Agent': 'timeout-race/%s' % i}
-    session.get("%s#%s" % (url, i), verify=False, headers=headers)
+    session.get(url, verify=False, headers=headers)

@@ -20,6 +20,8 @@ if sys.argv[1] == '--debug':
     requests_log.propagate = True
 
 
+print "requests version: %s" % requests.__version__
+
 
 url = sys.argv[1]
 if len(sys.argv) > 2:

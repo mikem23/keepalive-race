@@ -1,5 +1,9 @@
 #!/usr/bin/python
 
+"""
+This script demonstrates a race condition with HTTP/1.1 keepalive
+"""
+
 import requests
 import time
 import sys

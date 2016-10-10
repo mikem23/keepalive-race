@@ -51,5 +51,14 @@ just before it receives the new request.
     11935 02:23:38 read(7, 0x7ffefc539c3f, 1) = -1 EAGAIN (Resource temporarily unavailable) <0.000041>
     11935 02:23:38 semop(5013504, [{0, -1, SEM_UNDO}], 1 <unfinished ...>
 
+Judging from comments in [issue 3456](https://github.com/kennethreitz/requests/issues/3458),
+this may not be something that requests can reasonably fix. Possibly this is
+a weakness in the http/1.1 specification.
+
+> The server has not read from the socket layer yet, correct. However, the requests side of the connection cannot know that: from our perspective, our (blocking) writes have succeeded, which means that we have transferred data to the server. We are now expecting a response.
+
+> In practice, we like to leave that choice up to our users, who are better placed to decide what to retry than we are.
+
 See also
 * https://github.com/kennethreitz/requests/issues/2364
+* https://github.com/kennethreitz/requests/issues/3458

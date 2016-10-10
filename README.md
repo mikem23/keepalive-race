@@ -5,7 +5,7 @@ This script demonstrates a race condition that can happen with python-requests
 and certain web servers.
 
 The default with Apache httpd 2.4 is KeepAliveTimeout = 5. If you make a request,
-wait just the right amount of time, then make another request, then requests
+wait just the right amount of time, then make another request, the requests
 module may opt to reuse the connection, but by the time the server gets it
 the timeout will have expired.
 
@@ -36,6 +36,20 @@ output.
 The more network latency, the easier it is to hit the race. However, even
 against a local httpd server, I am able to dial in the delay to hit it
 reliably (in my case, about 4.995).
+
+An strace of the httpd process shows that httpd is shutting down the connection
+just before it receives the new request.
+
+    11935 02:23:33 poll([{fd=15, events=POLLIN}], 1, 5000 <unfinished ...>
+    11935 02:23:38 <... poll resumed> )     = 0 (Timeout) <5.005165>
+    11935 02:23:38 shutdown(15, SHUT_WR)    = 0 <0.000195>
+    11935 02:23:38 poll([{fd=15, events=POLLIN}], 1, 2000) = 1 ([{fd=15, revents=POLLIN}]) <0.000122>
+    11935 02:23:38 read(15, "GET /koji-static/debug.css HTTP/1.1\r\nHost: localhost\r\nConnection: keep-alive\r\nAccept-Encoding: gzip, deflate\r\nAccept: */*\r\nUser-Agent: timeout-race/4\r\n\r\n", 512) = 153 <0.000073>
+    11935 02:23:38 poll([{fd=15, events=POLLIN}], 1, 2000) = 1 ([{fd=15, revents=POLLIN|POLLHUP}]) <0.000030>
+    11935 02:23:38 read(15, "", 512)        = 0 <0.000053>
+    11935 02:23:38 close(15)                = 0 <0.000092>
+    11935 02:23:38 read(7, 0x7ffefc539c3f, 1) = -1 EAGAIN (Resource temporarily unavailable) <0.000041>
+    11935 02:23:38 semop(5013504, [{0, -1, SEM_UNDO}], 1 <unfinished ...>
 
 See also
 * https://github.com/kennethreitz/requests/issues/2364
